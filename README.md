@@ -1,6 +1,67 @@
-# Nix expressions for Firefox addons
+# Nix Expressions For Firefox Addons
 
 This flake provides about **30,000 addons** from https://addons.mozilla.org/ as Nix packages. (with more to come!)
+
+## How To Use
+
+### Declare Firefox Addons With [Home-Manager](https://github.com/nix-community/home-manager)
+
+#### With Flakes
+(it is assumed that Home Manager is set up)
+
+1. Add this repository as an input to your flake
+
+```nix
+{
+  inputs = {
+    # ...
+    nix-firefox-addons.url = "github:oscar-schwarz/nix-firefox-addons";
+  }
+  # ...
+}
+```
+
+(Make sure that `inputs` is exposed to your modules with `specialArgs`)
+
+
+2. In your `home.nix` (or wherever you configured Firefox) add the desired addons (uBlock Origin as an example)
+
+```nix
+{ inputs, pkgs, ... }: {
+  # ...
+  programs.firefox = {
+    enable = true;
+    # ...
+    extensions = {
+      packages = with inputs.nix-firefox-addons.addons.${pkgs.system} [
+        ublock-origin
+      ];
+      settings."uBlock0@raymondhill.net".settings = {
+        selectedFilterLists = [
+          "ublock-filters"
+          "ublock-badware"
+          "ublock-privacy"
+          "ublock-unbreak"
+          "ublock-quick-fixes"
+        ];
+      };
+    }
+  }
+}
+```
+
+#### Without Flakes
+
+TODO
+
+### Getting Addons
+
+To find the package name (slug) and the addon ID (guid) of the addon you want to add to your config, you can use the `search-addon` command of this flake. It takes one argument which is a search query of the addon you are looking for and it returns a list with 10 matching addons with name, slug and guid.
+
+```
+> nix run github:oscar-schwarz/nix-firefox-addons#search-addons ublock
+```
+
 
 ## Inspiration
 

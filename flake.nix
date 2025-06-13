@@ -14,10 +14,20 @@
 
         inherit (builtins) convertHash listToAttrs;
         inherit (pkgs.lib) pipe;
-        fromYamlFile = import ./src/lib/fromYamlFile.nix pkgs;
-        buildFirefoxXpiAddon = import ./src/lib/buildFirefoxXpiAddon.nix pkgs;
-        toNixpkgsLicense = import ./src/lib/toNixpkgsLicense.nix pkgs;
+        inherit (pkgs) writeShellApplication;
+
+        fromYamlFile = import ./src/lib/from-yaml-file.nix pkgs;
+        buildFirefoxXpiAddon = import ./src/lib/build-firefox-xpi-addon.nix pkgs;
+        toNixpkgsLicense = import ./src/lib/to-nixpkgs-license.nix pkgs;
       in {
+        packages = {
+          search-addon = writeShellApplication {
+            name = "search-addon";
+            runtimeInputs = [pkgs.nushell];
+            text = ''nu ${./src/search-addon.nu} "$@"'';
+          };
+        };
+
         addons = pipe ./addons.yaml [
           # read all addon data into memory
           fromYamlFile
@@ -37,7 +47,7 @@
               };
 
               meta = {
-                mozPersmissions = addonDetail.current_version.file.permissions or [];
+                mozPermissions = addonDetail.current_version.file.permissions or [];
                 license = toNixpkgsLicense addonDetail.current_version.license.slug;
               };
             }))

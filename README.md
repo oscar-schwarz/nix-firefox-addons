@@ -1,8 +1,6 @@
 # Nix expressions for Firefox addons
 
-There is no universal way (other than this flake) to get any Firefox addons from https://addons.mozilla.org/. Though there are some repositories containing a small fraction of Firefox addon expressions. But there is no go-to way of getting a nix expression for a such an addon.
-
-This flake largely solves this issue by providing about **30,000 addons** from https://addons.mozilla.org/ as Nix packages.(with more to come!)
+This flake provides about **30,000 addons** from https://addons.mozilla.org/ as Nix packages. (with more to come!)
 
 ## Inspiration
 

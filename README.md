@@ -30,18 +30,25 @@ This flake provides about **30,000 addons** from https://addons.mozilla.org/ as 
   programs.firefox = {
     enable = true;
     # ...
-    extensions = {
-      packages = with inputs.nix-firefox-addons.addons.${pkgs.system} [
-        ublock-origin
-      ];
-      settings."uBlock0@raymondhill.net".settings = {
-        selectedFilterLists = [
-          "ublock-filters"
-          "ublock-badware"
-          "ublock-privacy"
-          "ublock-unbreak"
-          "ublock-quick-fixes"
+    profiles.default = {
+      extensions = {
+        packages = with inputs.nix-firefox-addons.addons.${pkgs.system} [
+          ublock-origin
         ];
+        settings."uBlock0@raymondhill.net".settings = {
+          selectedFilterLists = [
+            "ublock-filters"
+            "ublock-badware"
+            "ublock-privacy"
+            "ublock-unbreak"
+            "ublock-quick-fixes"
+          ];
+        };
+      };
+
+      # optional: without this the addons need to be enabled manually after first install
+      settings = {
+        "extensions.autoDisableScopes" = 0;
       };
     }
   }

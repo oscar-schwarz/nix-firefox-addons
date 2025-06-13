@@ -12,11 +12,8 @@
   meta,
 }:
 stdenv.mkDerivation {
-  inherit pname;
-  name = "${pname}-${version}";
-
-  inherit meta;
-
+  inherit pname version meta;
+  
   src = fetchurl {inherit url sha256;};
 
   preferLocalBuild = true;

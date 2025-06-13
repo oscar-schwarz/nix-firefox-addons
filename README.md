@@ -2,11 +2,9 @@
 
 This flake provides about **30,000 addons** from https://addons.mozilla.org/ as Nix packages. (with more to come!)
 
-## How To Use
+## Declare Firefox Addons With [Home-Manager](https://github.com/nix-community/home-manager)
 
-### Declare Firefox Addons With [Home-Manager](https://github.com/nix-community/home-manager)
-
-#### With Flakes
+### With Flakes
 (it is assumed that Home Manager is set up)
 
 1. Add this repository as an input to your flake
@@ -50,17 +48,19 @@ This flake provides about **30,000 addons** from https://addons.mozilla.org/ as 
 }
 ```
 
-#### Without Flakes
+### Without Flakes
 
 TODO
 
-### Getting Addons
+## Getting Addons
 
 To find the package name (slug) and the addon ID (guid) of the addon you want to add to your config, you can use the `search-addon` command of this flake. It takes one argument which is a search query of the addon you are looking for and it returns a list with 10 matching addons with name, slug and guid.
 
 ```
-> nix run github:oscar-schwarz/nix-firefox-addons#search-addons ublock
+nix run github:oscar-schwarz/nix-firefox-addons#search-addon ublock
 ```
+![image](https://github.com/user-attachments/assets/006b2e45-c71f-47df-b55b-7d352cc818b5)
+
 
 
 ## Inspiration

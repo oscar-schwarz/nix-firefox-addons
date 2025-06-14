@@ -6,23 +6,6 @@
 
 # If we want to gather all addons available we need a different approach with which I haven't come up yet.
 
-const TYPES = ["extension", "statictheme" "dictionary"]
-const APPLICATIONS = ["android", "firefox"]
-const RELEVANT_FIELDS = [
-    id
-    guid
-    slug
-    current_version.version
-
-    current_version.file.url
-    current_version.file.hash
-
-    # summary.en-US
-    # homepage.url.en-US
-    current_version.file.permissions
-    current_version.license.slug
-]
-
 def main [ 
     addons_yaml: path 
     --sleep-between-calls (-s): duration = 0sec
@@ -34,7 +17,7 @@ def main [
         ^cat $addons_yaml
             | from yaml
             | reverse
-            | uniq-by id
+            | uniq-by g
             | save $addons_yaml --force
         return
     }
@@ -80,12 +63,17 @@ def main [
     def get-addon [id: int --prefetched-addon-detail (-d): table] {
         try {
             $prefetched_addon_detail 
-                | do {
-                    if ($in == null) {
-                        return (api $"/addons/addon/($id)" {lang: "en-US"})
-                    } else return $in
+                | if ($in == null) {
+                    (api $"/addons/addon/($id)" {lang: "en-US"})
+                } else $in
+                | {
+                    g: $in.guid,
+                    s: $in.slug,
+                    v: $in.current_version.version,
+                    u: $in.current_version.file.url,
+                    h: $in.current_version.file.hash,
+                    p: $in.current_version.file.permissions,
                 }
-                | select-deep ...$RELEVANT_FIELDS
         } catch {|err| print $"Addon with ID ($id) not found. Err: ($err.raw)"}
     }
 
@@ -130,21 +118,4 @@ def main [
             } else break
         }
     }
-}
-
-def select-deep [...fields: string] {
-    let $obj  = $in
-    mut $result = {}
-
-    for field in $fields {
-        if ($field | str contains ".") {
-            let root = $field | split row "." | first
-            let rest = $field | str replace $"($root)." "";
-            let new_obj = ($obj | default {} $root | get $root)
-            $result = $result | merge deep {$root: ($new_obj | select-deep $rest)}
-        } else {
-            $result = $result | merge {$field: ($obj | default null $field | get $field)}
-        }
-    }
-    return $result
 }

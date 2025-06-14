@@ -4,17 +4,25 @@
   stdenv,
   ...
 }: {
-  pname,
-  version,
   guid,
+  slug,
+  version,
   url,
-  sha256,
-  meta,
+  hash,
+  permissions
 }:
 stdenv.mkDerivation {
-  inherit pname version meta;
-  
-  src = fetchurl {inherit url sha256;};
+  inherit version;
+  pname = slug;
+
+  src = fetchurl {
+    inherit url;
+    sha256 = builtins.convertHash {
+      inherit hash;
+      toHashFormat = "sri";
+      hashAlgo = "sha256";
+    };
+  };
 
   preferLocalBuild = true;
   allowSubstitutes = true;
@@ -24,4 +32,6 @@ stdenv.mkDerivation {
     mkdir -p "$dst"
     install -v -m644 "$src" "$dst/${guid}.xpi"
   '';
+
+  meta.mozPermissions = permissions;
 }

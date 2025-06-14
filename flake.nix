@@ -33,23 +33,14 @@
           fromYamlFile
 
           # translate api resource to nix package
-          (map (addonDetail:
+          (map (addon:
             buildFirefoxXpiAddon {
-              inherit (addonDetail) guid;
-              pname = addonDetail.slug;
-              version = addonDetail.current_version.version;
-
-              url = addonDetail.current_version.file.url;
-              sha256 = convertHash {
-                inherit (addonDetail.current_version.file) hash;
-                toHashFormat = "sri";
-                hashAlgo = "sha256";
-              };
-
-              meta = {
-                mozPermissions = addonDetail.current_version.file.permissions or [];
-                license = toNixpkgsLicense addonDetail.current_version.license.slug;
-              };
+              guid = addon.g;
+              slug = addon.s;
+              version = addon.v;
+              url = addon.u;
+              hash = addon.h;
+              permissions = addon.p;
             }))
 
           # to attrset with name being the addon slug

@@ -13,23 +13,29 @@ def main [
     --fast (-f)
     --just-cleanup
 ] {
-    if ($just_cleanup) {
-        ^cat $addons_yaml
-            | from yaml
-            | reverse
-            | uniq-by g
-            | save $addons_yaml --force
-        return
-    }
-
-    if ($fast) {
-        save-all-addons -p {sort: "users"}
-    } else {
-        error make {
-            msg: "Gathering all addons existing addons is not yet implemented."
-            help: "Use --fast (-f) to gather only the 30k most popular addons."
+    if (not $just_cleanup) {
+        if ($fast) {
+            save-all-addons -p {sort: "users"}
+        } else {
+            error make {
+                msg: "Gathering all addons existing addons is not yet implemented."
+                help: "Use --fast (-f) to gather only the 30k most popular addons."
+            }
         }
     }
+
+    # after each operation clean up the file
+    open $addons_yaml
+        | each {from json}
+        | reverse
+        | uniq-by g
+        | each {to json --raw}
+        | to yaml
+        | save $addons_yaml --force
+    return
+
+
+    # Functions
 
     def get-known-addons [] {
         if ($addons_yaml | path exists) {
@@ -72,7 +78,8 @@ def main [
                     v: $in.current_version.version,
                     u: $in.current_version.file.url,
                     h: $in.current_version.file.hash,
-                    p: $in.current_version.file.permissions,
+                    p: ($in.current_version.file.permissions | default []),
+                    l: ($in.current_version | default {slug: "all-rights-reserved"} license | get license.slug),
                 }
         } catch {|err| print $"Addon with ID ($id) not found. Err: ($err.raw)"}
     }
@@ -99,7 +106,7 @@ def main [
                 
                 # if no error occurred remember seen addon
                 if ($addon_detail != null) {
-                    $new_addons = $new_addons | append $addon_detail
+                    $new_addons = $new_addons | append ($addon_detail | to json --raw)
                 }
             }
 
